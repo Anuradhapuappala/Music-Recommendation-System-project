@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Music Recommendation</title>
+<style>
+body { font-family:sans-serif; text-align:center; padding:50px; background:#f9f9f9; }
+input { padding:10px; width:250px; border-radius:20px 0 0 20px; border:none; outline:none; }
+button { padding:10px 15px; border:none; border-radius:0 20px 20px 0; background:#ff6f61; color:#fff; cursor:pointer; }
+button:hover { background:#ff3b2f; }
+ul { list-style:none; padding:0; max-width:600px; margin:auto; }
+li { background:white; margin:10px 0; padding:10px; border-radius:10px; display:flex; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+li img { width:60px; height:60px; border-radius:10px; margin-right:15px; object-fit:cover; }
+.song-info { text-align:left; }
+.song-title { font-weight:bold; font-size:16px; }
+.song-artist, .song-album { font-size:14px; color:#555; }
+</style>
+</head>
+<body>
+
+<h1>Music Recommendation System</h1>
+<div>
+<input type="text" id="titleInput" placeholder="Enter a song title">
+<button onclick="getRec()">Recommend</button>
+</div>
+
+<ul id="recommendationList"></ul>
+
+<script>
+function getRec(){
+    const title = document.getElementById('titleInput').value;
+    if(!title){ alert("Please enter a song"); return; }
+
+    fetch('/recommend',{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'title='+encodeURIComponent(title)
+    })
+    .then(r=>r.json())
+    .then(data=>{
+        const list = document.getElementById('recommendationList');
+        list.innerHTML='';
+        data.forEach(s=>{
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <img src="${s.image}" alt="${s.title}">
+                <div class="song-info">
+                    <div class="song-title"><a href="${s.url}" target="_blank">${s.title}</a></div>
+                    <div class="song-artist">Artist: ${s.artist}</div>
+                    <div class="song-album">Album: ${s.album}</div>
+                </div>
+            `;
+            list.appendChild(li);
+        });
+    })
+    .catch(err=>{ console.error(err); alert("Error fetching recommendations"); });
+}
+</script>
+
+</body>
+</html>
